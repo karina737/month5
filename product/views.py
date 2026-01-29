@@ -8,7 +8,8 @@ from .serializers import (CategoryListSerializer,
                           ReviewListSerializer, 
                           CategoryDetailSerializer,
                           ProductDetailSerializer,
-                          ReviewDetailSerializer)
+                          ReviewDetailSerializer,
+                          ProductReviewsSerializer)
 
 @shop_api(['GET'])
 def category_list_api_view(request):
@@ -31,11 +32,16 @@ def product_list_api_view(request):
 def review_list_api_view(request):
     reviews=Review.objects.all()
     data= ReviewListSerializer(reviews, many=True).data 
-    
     return Response(
         data=data,
     )
-    
+@shop_api(['GET'])
+def review_list_product_api_view(request):
+    rating=Product.objects.all()
+    data=ProductReviewsSerializer(rating, many=True).data
+    return Response(
+        data=data,
+    )
 @shop_api(['GET'])
 def category_detail_api_view(request, id):
     try:
