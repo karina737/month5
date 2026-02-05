@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Category, Product, Review
+from rest_framework.exceptions import ValidationError
 
 
 class CategoryListSerializer(serializers.ModelSerializer):
@@ -55,3 +56,33 @@ class ReviewDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model=Review
         fields='__all__'
+
+class CategoryValidateSerializer(serializers.Serializer):
+    name=serializers.CharField(required=True, min_length=2, max_length=50)
+    
+    
+class ProductValidateSerializer(serializers.Serializer):
+    title=serializers.CharField(required=True, min_length=2, max_length=255)
+    description=serializers.CharField(required=False)
+    price=serializers.IntegerField()
+    category_id=serializers.IntegerField(min_value=1)
+    
+    def validate_category_id(self, category_id):
+        try:
+            Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            raise ValidationError('There is no such ID')
+        return category_id
+    
+    
+class ReviewValidateSerializer(serializers.Serializer):
+    text=serializers.CharField(required=True, min_length=2, max_length=255)
+    stars=serializers.IntegerField(default=5)
+    product_id=serializers.IntegerField(min_value=1)
+    
+    def validate_product_id(self, product_id):
+        try:
+            Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            raise ValidationError('There is no such ID')
+        return product_id
