@@ -1,0 +1,29 @@
+
+from rest_framework.decorators import api_view as shop_api
+from rest_framework.response import Response
+from .serializers import RegisterSerializer, ConfirmSerializer, LoginSerializer
+from .models import Confirm
+@shop_api(['POST'])
+def registration_api_view(request):
+    serializer = RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    result = serializer.save()
+    return Response({
+        "message": "User created",
+        "code": result["code"]
+    })
+@shop_api(['POST'])
+def confirm_api_view(request):
+    serializer = ConfirmSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data
+    user.is_active = True
+    user.save()
+    Confirm.objects.get(user=user).delete()
+    return Response({"message": "User confirmed"})
+
+@shop_api(['POST'])
+def login_api_view(request):
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    return Response({"message": "Login success"})
